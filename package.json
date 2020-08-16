@@ -1,0 +1,23 @@
+{
+  "name": "chrome-shikiho",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "node dist/app.js"
+  },
+  "devDependencies": {
+    "@types/copy-webpack-plugin": "^6.0.0",
+    "@types/webpack": "^4.41.21",
+    "copy-webpack-plugin": "^6.0.3",
+    "ts-loader": "^8.0.2",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.7",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
+  },
+  "dependencies": {},
+  "description": "shikiho viewing support",
+  "main": "index.js",
+  "repository": "https://github.com/mattak/chrome-shikiho",
+  "author": "mattak <mattak.me@gmail.com>",
+  "license": "MIT"
+}
