@@ -232,12 +232,14 @@ function check(e: any) {
     const checkInterval = setInterval(jsLoaded, 1000);
 
     function jsLoaded() {
-        if (document.querySelector('#main div.performance div.matrix')) {
+        console.log('DEBUG: jsLoaded');
+        if (document.querySelector('#main div.performance div.matrix') ||
+            document.querySelector('#main div.update div.matrix')) {
             clearInterval(checkInterval);
             run();
         }
     }
 }
 
-console.log("DEBUG: start");
+console.log("DEBUG: start.");
 window.addEventListener("load", check, false);
