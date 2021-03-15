@@ -4,7 +4,11 @@ function parseTableHeader(table: HTMLElement): string[] {
 
 function parseTableBody(table: HTMLElement): string[][] {
     const trs = Array.from(table.querySelectorAll('tbody tr'));
-    const cells = trs.map(tr => Array.from(tr.querySelectorAll('td')).map(td => td.textContent || ''));
+    const cells = trs.map(tr =>
+        Array.from(tr.querySelectorAll('td'))
+            .map(td => td.textContent || '')
+            .map(it => it.replace(/記/, ''))
+    );
     return cells;
 }
 
@@ -15,7 +19,9 @@ function isDigit(text: string): boolean {
 }
 
 function parseNumber(text: string): number {
-    const raw = text.replace(/,/g, '').replace(/〜.+$/, '');
+    const raw = text
+        .replace(/,/g, '')
+        .replace(/〜.+$/, '');
     return parseFloat(raw);
 }
 
@@ -232,7 +238,6 @@ function check(e: any) {
     const checkInterval = setInterval(jsLoaded, 1000);
 
     function jsLoaded() {
-        console.log('DEBUG: jsLoaded');
         if (document.querySelector('#main div.performance div.matrix') ||
             document.querySelector('#main div.update div.matrix')) {
             clearInterval(checkInterval);
@@ -241,5 +246,4 @@ function check(e: any) {
     }
 }
 
-console.log("DEBUG: start.");
 window.addEventListener("load", check, false);
