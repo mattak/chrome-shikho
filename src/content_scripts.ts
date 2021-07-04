@@ -7,7 +7,7 @@ function parseTableBody(table: HTMLElement): string[][] {
     const cells = trs.map(tr =>
         Array.from(tr.querySelectorAll('td'))
             .map(td => td.textContent || '')
-            .map(it => it.replace(/記/, ''))
+            .map(it => it.replace(/(記|特)/, ''))
     );
     return cells;
 }
