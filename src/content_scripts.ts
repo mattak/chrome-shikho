@@ -3,6 +3,21 @@ import {parseMarketCapital, parseTableBody, parseTableHeader} from "./parser_uti
 import {createGrowthRateCells} from "./growth_rate_cells_creator_util";
 import {createFormattedCells} from "./formatted_cells_creator_util";
 
+function dropCells(cells: any[][]): any[][] {
+    let results: any[][] = [];
+    let previousOrder = 0;
+    for (let i = 0; i < cells.length; i++) {
+        const yearAndMonth = cells[i][0].replace(/[^\d.]/g, '');
+        console.log("yearAndMonth:", i, yearAndMonth);
+        const [year, month] = yearAndMonth.split('.').map(Number);
+        const order = year * 100 + month;
+        if (order <= previousOrder) break
+        previousOrder = order;
+        results.push(cells[i]);
+    }
+    return results;
+}
+
 function renderAppendTable(selector: string) {
     const tableParent = document.querySelector(selector);
     const table = tableParent?.querySelector('table');
@@ -13,8 +28,10 @@ function renderAppendTable(selector: string) {
     if (!(table instanceof HTMLTableElement)) return;
 
     const headers = parseTableHeader(table);
-    const cells = parseTableBody(table);
+    let cells = parseTableBody(table);
     const marketCapital = parseMarketCapital(document.body, "div.stock-index span.cap");
+
+    cells = dropCells(cells);
 
     console.log("header", headers);
     console.log("cells", cells);
