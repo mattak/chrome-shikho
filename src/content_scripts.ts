@@ -1,96 +1,7 @@
-function parseTableHeader(table: HTMLElement): string[] {
-    return Array.from(table.querySelectorAll('thead th')).map(it => it.textContent || '');
-}
-
-function parseTableBody(table: HTMLElement): string[][] {
-    const trs = Array.from(table.querySelectorAll('tbody tr'));
-    const cells = trs.map(tr =>
-        Array.from(tr.querySelectorAll('td'))
-            .map(td => td.textContent || '')
-            .map(it => it.replace(/(記|特)/, ''))
-    );
-    return cells;
-}
-
-function isDigit(text: string): boolean {
-    if (text === null || text === "" || text === "-") return false;
-    const re = /[^\d,\.\-〜]/g;
-    return !re.test(text);
-}
-
-function parseNumber(text: string): number {
-    const raw = text
-        .replace(/,/g, '')
-        .replace(/〜.+$/, '');
-    return parseFloat(raw);
-}
-
-function parseCurrencyText(text: string): number {
-    const raw = text.replace('億円', '');
-    return parseNumber(raw);
-}
-
-// unit: 百万円
-function parseMarketCapital(root: HTMLElement): number {
-    const dt = Array.from(root.querySelectorAll('div#main div.sub div.stock dl dt')).find(it => it.textContent === "時価総額");
-    const priceRawText = dt?.parentElement?.querySelector('dd')?.textContent;
-
-    if (priceRawText == null) return -1;
-    return parseCurrencyText(priceRawText) * 100.0;
-}
-
-function createTable(headers: string[], cells: any[][]): HTMLTableElement {
-    const table = document.createElement("table") as HTMLTableElement;
-    const thead = document.createElement("thead") as HTMLElement;
-    const tbody = document.createElement("tbody") as HTMLElement;
-
-    table.style.width = "100%"
-    table.appendChild(thead);
-    table.appendChild(tbody);
-
-    {
-        const tr = document.createElement("tr") as HTMLElement;
-
-        for (let x = 0; x < headers.length; x++) {
-            const th = document.createElement("th") as HTMLElement;
-            th.textContent = headers[x];
-            th.style.border = "dashed 1px orange";
-            tr.appendChild(th);
-        }
-        thead.appendChild(tr);
-    }
-
-    for (let y = 0; y < cells.length; y++) {
-        const elements = cells[y];
-        const tr = document.createElement("tr") as HTMLElement;
-
-        for (let x = 0; x < elements.length; x++) {
-            const td = document.createElement("td") as HTMLElement;
-            td.innerHTML = elements[x];
-            td.style.border = "dashed 1px orange";
-            tr.appendChild(td);
-        }
-        tbody.appendChild(tr);
-    }
-
-    return table;
-}
-
-function invertXY(cells: string[][]): string[][] {
-    if (cells.length < 1) return [];
-    const ySize = cells.length;
-    const xSize = cells[0].length;
-    let results = [];
-
-    for (let x = 0; x < xSize; x++) {
-        let line = [];
-        for (let y = 0; y < ySize; y++) {
-            line.push(cells[y][x]);
-        }
-        results.push(line);
-    }
-    return results;
-}
+import {isDigit} from "./string_util";
+import {invertXY} from "./matrix_util";
+import {createTable} from "./table_creator_util";
+import {parseMarketCapital, parseNumber, parseTableBody, parseTableHeader} from "./parser_util";
 
 function calculateGrowthRate(marketCapital: number, cells: string[][]): any[][] {
     if (cells.length < 2) return [];
@@ -210,6 +121,7 @@ function formatCells(cells: any[][]): any[][] {
 function renderAppendTable(selector: string) {
     const tableParent = document.querySelector(selector);
     const table = tableParent?.querySelector('table');
+    console.log("table:", table);
 
     if (tableParent == null) return;
     if (table == null) return;
@@ -217,10 +129,10 @@ function renderAppendTable(selector: string) {
 
     const headers = parseTableHeader(table);
     const cells = parseTableBody(table);
-    const marketCapital = parseMarketCapital(document.body);
+    const marketCapital = parseMarketCapital(document.body, "div.stock-index span.cap");
 
-    console.log(headers);
-    console.log(cells);
+    console.log("header", headers);
+    console.log("cells", cells);
 
     const growthCells = calculateGrowthRate(marketCapital, cells);
     const growthHeaders = [...headers, "営利率", "売成+営率", "PSR"];
@@ -229,21 +141,24 @@ function renderAppendTable(selector: string) {
     tableParent.appendChild(newTable);
 }
 
+
+const SELECTOR_PERFORMANCE_TABLE = 'div.performance-table:nth-of-type(1)';
+
 const run = async () => {
-    renderAppendTable('#main div.performance div.matrix');
-    renderAppendTable('#main div.update div.matrix');
+    renderAppendTable(SELECTOR_PERFORMANCE_TABLE);
 }
 
-function check(e: any) {
+function runByCheckingInterval() {
     const checkInterval = setInterval(jsLoaded, 1000);
 
     function jsLoaded() {
-        if (document.querySelector('#main div.performance div.matrix') ||
-            document.querySelector('#main div.update div.matrix')) {
+        if (document.querySelector(SELECTOR_PERFORMANCE_TABLE)) {
             clearInterval(checkInterval);
             run();
         }
     }
 }
 
-window.addEventListener("load", check, false);
+runByCheckingInterval();
+
+console.log("chrome-shikiho: content_scripts loaded");
