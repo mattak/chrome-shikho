@@ -1,15 +1,26 @@
 {
   "name": "Shikiho Support",
   "version": "0.0.1",
-  "description": "Build an Extension!",
-  "manifest_version": 2,
-  "browser_action": {
-    "default_icon": "icon_32.png"
+  "description": "add extra shikiho chart",
+  "manifest_version": 3,
+  "permissions": [
+    "scripting",
+    "tabs",
+    "activeTab"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
   },
+  "host_permissions": [
+    "https://shikiho.jp/*",
+    "https://shikiho.toyokeizai.net/*"
+  ],
   "content_scripts": [
     {
       "matches": [
-        "https://shikiho.jp/*"
+        "https://shikiho.jp/*",
+        "https://shikiho.toyokeizai.net/*"
       ],
       "js": [
         "content_scripts.js"
