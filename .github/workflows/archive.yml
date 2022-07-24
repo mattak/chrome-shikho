@@ -36,11 +36,11 @@ jobs:
 
     - name: yarn build
       id: yarn-build
-      run: yarn build && zip -r dist.zip dist/
+      run: yarn build && mv dist chrome-shikiho && zip -r chrome-shikiho.zip chrome-shikiho/
 
     - name: 'Upload Artifact'
       uses: actions/upload-artifact@v3
       with:
-        name: archive
-        path: dist.zip
+        name: chrome-shikiho
+        path: chrome-shikiho.zip
         retention-days: 5
