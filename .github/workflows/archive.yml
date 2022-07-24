@@ -1,0 +1,46 @@
+name: export chrome plugin
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: setup node
+      uses: actions/setup-node@v3
+      with:
+        node-version: '17.x'
+
+    - name: get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+
+    - name: install
+      run: yarn --check-files --frozen-lockfile --non-interactive
+
+    - name: cache yarn dependencies
+      uses: actions/cache@v3
+      id: yarn-cache
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: yarn build
+      id: yarn-build
+      run: yarn build && zip -r dist.zip dist/
+
+    - name: 'Upload Artifact'
+      uses: actions/upload-artifact@v3
+      with:
+        name: archive
+        path: dist.zip
+        retention-days: 5
